@@ -59,7 +59,7 @@ class Logger {
 //TODO
     }
 
-    public void log(Level level, String tag, Object object, int flag) {
+    public synchronized void log(Level level, String tag, Object object, int flag) {
         if (!enable) {
             return;
         }

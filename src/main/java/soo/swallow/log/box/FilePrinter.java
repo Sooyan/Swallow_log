@@ -51,6 +51,7 @@ public class FilePrinter implements Printer, Runnable {
     private File logFile;
     private BlockingQueue<Package> packageQueue = new LinkedBlockingQueue<>();
 
+    private Thread thread;
     private boolean isRunning;
 
     public static synchronized FilePrinter getInstance(Context context, File workSpace) {
@@ -109,8 +110,9 @@ public class FilePrinter implements Printer, Runnable {
 
     private void startIfNecessary() {
         synchronized (LOCK) {
-            if (!isRunning) {
-                new Thread(this).start();
+            if (!isRunning && thread == null) {
+                thread = new Thread(this);
+                thread.start();
             }
         }
     }
@@ -162,6 +164,9 @@ public class FilePrinter implements Printer, Runnable {
             }
             synchronized (LOCK) {
                 isRunning = false;
+                if (thread != null) {
+                    thread = null;
+                }
             }
         }
     }
