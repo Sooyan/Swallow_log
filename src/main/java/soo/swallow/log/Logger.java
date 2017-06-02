@@ -34,7 +34,8 @@ class Logger {
     private boolean isPrintTrace;
     private int traceMaxSize;
 
-    private Printer printer;
+    private Printer filePrinter;
+    private Printer logCatPrinter;
     private ThemeSpec themeSpec;
     private Loggable loggable;
     private LineFactoryProxy lineFactoryProxy;
@@ -47,7 +48,8 @@ class Logger {
         this.isPrintTrace = configuration.isPrintTrace;
         this.traceMaxSize = configuration.traceMaxSize;
 
-        this.printer = configuration.printer;
+        this.filePrinter = configuration.filePrinter;
+        this.logCatPrinter = configuration.logcatPrinter;
         this.themeSpec = new ThemeSpec(configuration.theme);
         this.loggable = configuration.loggable;
         this.lineFactoryProxy = new LineFactoryProxy(configuration.lineFactoryMap);
@@ -120,7 +122,25 @@ class Logger {
     }
 
     private void printContent(String tag, Level level, String content, int flag) {
-        printer.print(tag, level, content, flag);
+        switch (flag) {
+            case Log.FLAG_FILE:
+                if (filePrinter != null) {
+                    filePrinter.print(tag, level, content);
+                }
+                break;
+            case Log.FLAG_LOGCAT:
+                if (logCatPrinter != null) {
+                    logCatPrinter.print(tag, level, content);
+                }
+                break;
+            case Log.FLAG_BOTH:
+                printContent(tag, level, content, Log.FLAG_LOGCAT);
+                printContent(tag, level, content, Log.FLAG_FILE);
+                break;
+            default:
+                printContent(tag, level, content, Log.FLAG_LOGCAT);
+                break;
+        }
     }
 
     private String[] getHeaderLines(Thread thread) {

@@ -24,7 +24,6 @@ import soo.swallow.log.Theme;
  * Created by Joseph.yan
  */
 public class DefaultTheme implements Theme {
-    private static final String TAG = "DefaultTheme--->";
 
     private static final char CHAR_HORIZONTAL = '═';
     private static final char CHAR_VERTICAL = '║';

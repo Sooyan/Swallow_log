@@ -21,5 +21,5 @@
  */
 public interface Printer {
 
-    void print(String tag, Level level, String message, int flag);
+    void print(String tag, Level level, String message);
 }

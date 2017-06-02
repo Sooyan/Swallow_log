@@ -22,7 +22,6 @@ package soo.swallow.log;
  * Created by Joseph.yan
  */
 public final class Log {
-    private static final String TAG = "Log--->";
 
     public static final int FLAG_LOGCAT = 0xf01;
     public static final int FLAG_FILE = 0xf02;

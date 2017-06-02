@@ -24,7 +24,6 @@ import android.text.TextUtils;
  * Created by Joseph.yan
  */
 class ThemeSpec {
-    private static final String TAG = "ThemeSpec--->";
 
     private final char ltChar;
     private final char lbChar;

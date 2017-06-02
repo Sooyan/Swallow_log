@@ -25,7 +25,6 @@ import soo.swallow.log.Loggable;
  * Created by Joseph.yan
  */
 public class DefaultLoggable implements Loggable {
-    private static final String TAG = "DefaultLoggable--->";
 
     @Override
     public boolean forClass(Class<?> cls) {

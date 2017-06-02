@@ -18,44 +18,69 @@
 
 package soo.swallow.log;
 
+import android.content.Context;
+import android.text.TextUtils;
+
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import soo.swallow.log.box.DefaultLoggable;
 import soo.swallow.log.box.DefaultTheme;
+import soo.swallow.log.box.FilePrinter;
 import soo.swallow.log.box.LogcatPrinter;
 
 /**
  * Created by Joseph.yan
  */
 public class Configuration {
-    private static final String TAG = "Configuration--->";
 
-    private Configuration() {}
-
+    Context context;
+    String name;
     boolean enable = true;
     boolean isPrintHeader = true;
     boolean isPrintTrace = true;
-    String defaultTag = "--->";
-    Level defaultLevel = Level.DEBUG;
+    String defaultTag;
+    Level defaultLevel;
     int traceMaxSize = 3;
 
-    protected Theme theme;
-    Printer printer;
+    File workSpace;
+
+    Theme theme;
+    Printer filePrinter;
+    Printer logcatPrinter;
+
     Loggable loggable;
 
     Map<Class<?>, LineFactory> lineFactoryMap = new HashMap<>();
 
+    private Configuration(Context context) {
+        this.context = context;
+    }
+
     public static class Builder {
+
+        private static final String DEFAULT_NAME = "SwallowLog";
+        private static final String DEFAULT_TAG = "--->";
 
         private Configuration configuration;
 
-        public Builder() {
-            configuration = new Configuration();
+        public Builder(Context context) {
+            configuration = new Configuration(context);
+        }
+
+        public Builder setName(String name) {
+            configuration.name = name;
+            return this;
         }
 
         public Builder setEnable(boolean enable) {
             configuration.enable = enable;
+            return this;
+        }
+
+        public Builder setWorkSpace(File workSpace) {
+            configuration.workSpace = workSpace;
             return this;
         }
 
@@ -71,11 +96,6 @@ public class Configuration {
 
         public Builder setTheme(Theme theme) {
             configuration.theme = theme;
-            return this;
-        }
-
-        public Builder setPrinter(Printer printer) {
-            configuration.printer = printer;
             return this;
         }
 
@@ -105,17 +125,41 @@ public class Configuration {
         }
 
         public Configuration build() {
+            notNull(configuration.context, "Context is null");
+            if (TextUtils.isEmpty(configuration.name)) {
+                configuration.name = DEFAULT_NAME;
+            }
+            if (TextUtils.isEmpty(configuration.defaultTag)) {
+                configuration.defaultTag = DEFAULT_TAG;
+            }
+            if (configuration.defaultLevel == null) {
+                configuration.defaultLevel = Level.DEBUG;
+            }
             if (configuration.theme == null) {
                 configuration.theme = new DefaultTheme();
-            }
-            if (configuration.printer == null) {
-                configuration.printer = new LogcatPrinter();
             }
             if (configuration.loggable == null) {
                 configuration.loggable = new DefaultLoggable();
             }
+            if (configuration.logcatPrinter == null) {
+                configuration.logcatPrinter = new LogcatPrinter();
+            }
+            if (configuration.filePrinter == null) {
+                if (configuration.workSpace == null) {
+                    configuration.workSpace = configuration.context.getDir(configuration.name,
+                            Context.MODE_APPEND);
+                }
+                configuration.filePrinter = FilePrinter.getInstance(configuration.context,
+                        configuration.workSpace);
+            }
 
             return configuration;
+        }
+
+        static void notNull(Object obj, String message) {
+            if (obj == null) {
+                throw new NullPointerException(message);
+            }
         }
     }
 }

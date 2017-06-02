@@ -27,10 +27,9 @@ import soo.swallow.log.Printer;
  * Created by Joseph.yan
  */
 public class LogcatPrinter implements Printer {
-    private static final String TAG = "LogcatPrinter--->";
 
     @Override
-    public void print(String tag, Level level, String message, int flag) {
+    public void print(String tag, Level level, String message) {
         android.util.Log.println(mapPriority(level), tag, message);
     }
 
