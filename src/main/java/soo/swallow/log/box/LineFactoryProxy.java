@@ -27,8 +27,6 @@ import soo.swallow.log.LineFactory;
  */
 public class LineFactoryProxy implements LineFactory<Object> {
 
-    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
-
     private static final String NULL_OBJECT = "<null>";
 
     private final Map<Class<?>, LineFactory> delegateMap;

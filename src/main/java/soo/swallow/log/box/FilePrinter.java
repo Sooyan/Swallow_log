@@ -41,6 +41,7 @@ import soo.swallow.log.Printer;
  */
 public class FilePrinter implements Printer, Runnable {
 
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
     private static final String NAME_PREFIX = "L";
     private static final Object LOCK = new Object();
 
@@ -140,6 +141,7 @@ public class FilePrinter implements Printer, Runnable {
                 Package.recycle(p);
 
                 fileWriter.write(content);
+                fileWriter.write(LINE_SEPARATOR);
                 fileWriter.flush();
 
                 synchronized (LOCK) {
@@ -168,8 +170,6 @@ public class FilePrinter implements Printer, Runnable {
 
         private static final int MAX_SIZE = 20;
         private static LinkedList<Package> pool = new LinkedList<>();
-        private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        private static Date date = new Date();
 
         String nameSpace;
         String tag;
@@ -203,8 +203,8 @@ public class FilePrinter implements Printer, Runnable {
         }
 
         @Override
-        public String toString() {
-            return getTimeStr()
+        public synchronized String toString() {
+            return getS()
                     + "/"
                     + nameSpace
                     + "/"
@@ -215,9 +215,9 @@ public class FilePrinter implements Printer, Runnable {
                     + message;
         }
 
-        private String getTimeStr() {
-            date.setTime(System.currentTimeMillis());
-            return simpleDateFormat.format(date);
+        private String getS() {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            return simpleDateFormat.format(new Date());
         }
     }
 }

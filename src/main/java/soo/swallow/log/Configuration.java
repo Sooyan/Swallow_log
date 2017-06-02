@@ -19,9 +19,12 @@
 package soo.swallow.log;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -146,11 +149,16 @@ public class Configuration {
             }
             if (configuration.filePrinter == null) {
                 if (configuration.workSpace == null) {
-                    configuration.workSpace = configuration.context.getDir(configuration.name,
-                            Context.MODE_APPEND);
+                    configuration.workSpace = getLogDirectory(configuration.context, configuration.name);
+                    if (configuration.workSpace == null) {
+                        configuration.workSpace = configuration.context.getDir(configuration.name,
+                                Context.MODE_APPEND);
+                    }
                 }
-                configuration.filePrinter = FilePrinter.getInstance(configuration.context,
-                        configuration.workSpace);
+                if (configuration.workSpace != null) {
+                    configuration.filePrinter = FilePrinter.getInstance(configuration.context,
+                            configuration.workSpace);
+                }
             }
 
             return configuration;
@@ -160,6 +168,45 @@ public class Configuration {
             if (obj == null) {
                 throw new NullPointerException(message);
             }
+        }
+
+        public static File getLogDirectory(Context context, String dirName) {
+            File appLogDir = null;
+            String externalStorageState;
+            try {
+                externalStorageState = Environment.getExternalStorageState();
+            } catch (NullPointerException | IncompatibleClassChangeError e) {
+                externalStorageState = "";
+            }
+            if (android.os.Environment.MEDIA_MOUNTED.equals(externalStorageState)
+                    && hasExternalStoragePermission(context)) {
+                appLogDir = getExternalLogDir(context, dirName);
+            }
+            if (appLogDir == null) {
+                appLogDir = context.getDir(dirName, Context.MODE_APPEND);
+            }
+            return appLogDir;
+        }
+
+        private static File getExternalLogDir(Context context, String dirName) {
+            File dataDir = new File(new File(Environment.getExternalStorageDirectory(), "Android"), "data");
+            File appLogDir = new File(new File(dataDir, context.getPackageName()), dirName);
+            if (!appLogDir.exists()) {
+                if (!appLogDir.mkdirs()) {
+                    return null;
+                }
+                try {
+                    new File(appLogDir, ".nomedia").createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return appLogDir;
+        }
+
+        private static boolean hasExternalStoragePermission(Context context) {
+            int perm = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+            return perm == PackageManager.PERMISSION_GRANTED;
         }
     }
 }
